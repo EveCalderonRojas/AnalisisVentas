@@ -1,0 +1,116 @@
+---
+title: 'Análisis de ventas: Cartago'
+author: "Evelin Calderón Rojas"
+date: "2025-01-08"
+output: 
+  html_document:
+    theme: journal    
+    highlight: tango 
+---
+
+
+
+Es momento de hacer un recuento de las ventas que se han tenido durante estos años.
+
+Por lo que, cargando los datos de los registros totales de las ventas del local es que se realizará el análisis.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(ggplot2)
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+```
+
+```{r include=FALSE }
+file_path <- "C:/Users/evely/OneDrive/Documentos/Cosas de la U/Cartago_ventas.xlsx"
+datos <- read_excel(file_path, sheet = "Cartago_ventas")
+datos
+
+
+options(scipen = 999)
+options(width = 200)
+
+Ventas <- kable(datos, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  scroll_box(height = "300px")
+
+```
+
+Los datos suministrados se pueden observar a continuación:
+
+```{r }
+Ventas
+```
+
+
+Para poder analizar mejor la información se crearán dos gráficos:
+
+1. Un grafico con todos los meses y sus respectivas ventas
+2. Un gráfico anual, en el cual se puede ver el movimiento de las ventas conforme pasan los años
+
+Ya que, el objetivo principal es el poder observar el crecimiento que se ha ido teniendo con los años, y en dado caso de que, ocurran descensos, ver en dónde es que se está cayendo y poder analizar posibles motivos.
+
+```{r include=FALSE}
+# Transformar datos para el gráfico mensual
+datos_mensuales <- datos %>%
+  select(-TotalAnual) %>%
+  pivot_longer(cols = -Anno, 
+               names_to = "Mes", 
+               values_to = "Ventas") %>%
+  mutate(Mes = factor(Mes, levels = c("Enero", "Febrero", "Marzo", "Abril", 
+                                      "Mayo", "Junio", "Julio", "Agosto", 
+                                      "Septiembre", "Octubre", "Noviembre", "Diciembre")))
+
+
+grafico_mensual <- ggplot(datos_mensuales, aes(x = Mes, y = Ventas, color = as.factor(Anno), group = Anno)) +
+  geom_line(linewidth = 1) +
+  labs(title = "Ventas Mensuales por Año",
+       x = "Mes",
+       y = "Ventas",
+       color = "Año") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+grafico_anual <- ggplot(datos, aes(x = as.factor(Anno), y = TotalAnual, fill = as.factor(Anno))) +
+  geom_bar(stat = "identity") +
+  labs(title = "Ventas Totales Anuales",
+       x = "Año",
+       y = "Ventas Totales",
+       fill = "Año") +
+  theme_minimal()
+
+
+```
+
+Con esto listo, es momento de gráficar la información contenida en los datos:
+
+
+A continuación se muestra el gráfico mensual, el mismo contiene todas las ventas registradas a lo largo de los meses según cada año: 
+```{r }
+
+grafico_mensual
+
+```
+
+
+Ahora bien, con el anual, se muestra el movimiento de las ventas durante los años:
+
+```{r }
+
+grafico_anual
+
+```
+
+
+Conclusión:
+
+Se puede observar que el año "pico", hasta el momento, ha sido el 2023, y que, al menos para el 2024, lastimosamente cae al mismo nivel de ventas registradas en el 2022.
+
+Este analisis nos arroja una situación que se vive desde hace tiempo en la economía, el comportamiento de consumo ha estado cambiando, además, de que es necesario realizar investigaciones más a fondo para determinar si no habrá algún tipo de factor que esté alterando la baja en las ventas, y en caso de encontrar ese elemento, determinar las soluciones a tomar para corregir esta problemática.
